@@ -1,0 +1,76 @@
+package com.example.demo.controllers;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import java.util.ArrayList;
+
+import com.example.demo.bean.Libro;
+import com.example.demo.bean.Usuario;
+
+import repository.BaseDatos;
+
+@Controller //Lo convertimos en un servidor que atiende peticiones http
+@RequestMapping("")
+public class Controlador {
+	
+	BaseDatos bd = new BaseDatos();
+	Usuario usuario;
+	
+	@GetMapping("/")
+	public String iniciar(Model model) {
+		model.addAttribute("titulo", "FORMULARIO DE ACCESO");
+		return "login";
+	}
+	
+	@PostMapping("/")
+	public String login(Usuario usuario, Model model) {
+		if(usuario.getNombre().equals("edu") && usuario.getPassword().equals("edu")) {
+			ArrayList<Libro> libros = bd.getLibros();
+			model.addAttribute("usuario",usuario);
+			this.usuario = usuario;
+			model.addAttribute("libros", libros);
+			return "consulta";
+		}else
+			return "login";
+	}
+	
+	@PostMapping("/insertar")
+	public String insertar(Libro libro, Model model) {
+		bd.inserta(libro);
+		ArrayList<Libro> libros = bd.getLibros();
+		model.addAttribute("usuario", this.usuario);
+		model.addAttribute("libros", libros);
+		model.addAttribute("boton", "Inserta Libro");
+		model.addAttribute("action", "/insertar");
+		return "consulta";
+	}
+	
+	@GetMapping("/modificar/{id}")
+	public String modificar(@PathVariable int id, Model model) {
+		Libro libro = bd.getLibro(id);
+		ArrayList<Libro> libros = bd.getLibros();
+		model.addAttribute("libro", libros);
+		model.addAttribute("libros", libro);
+		model.addAttribute("usuario", this.usuario);
+		model.addAttribute("boton", "Actualizar libro");
+		model.addAttribute("action", "/modificar");
+		return "consulta";
+	}
+	
+	@PostMapping("/modificar")
+	public String modificar2(Libro libro, Model model) {
+		bd.modifica(libro);
+		ArrayList<Libro> libros = bd.getLibros();
+		model.addAttribute("usuario", this.usuario);
+		model.addAttribute("libros", libros);
+		model.addAttribute("libro", null);
+		model.addAttribute("boton", "Inserta Libro");
+		model.addAttribute("action", "/insertar");
+		return "consulta";
+	}
+}
